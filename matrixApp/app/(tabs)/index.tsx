@@ -9,6 +9,7 @@ import { CameraView, CameraType, useCameraPermissions, Camera
  } from 'expo-camera';
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, View, StyleSheet, Text, Animated } from 'react-native';
+import * as FileSystem from 'expo-file-system';
 
 export default function HomeScreen() {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -18,6 +19,7 @@ export default function HomeScreen() {
   const [animatedOpacity] = useState(new Animated.Value(0));
   const [cameraDisable, setCameraDisable] = useState(false);
   const [showFlashAnimationOpacity, setShowFlashAnimationOpacity] = useState(false);
+  const [photoCount, setPhotoCount] = useState(0); // Counter state for the number of photos taken
 
   useEffect(() => {
     requestCameraPermission();
@@ -56,15 +58,13 @@ export default function HomeScreen() {
     });
   }
 
+
   const takePicture = async () => {
     if (cameraDisable) return;
     //disable camera and show flash animation
     setShowFlashAnimationOpacity(true);
     setCameraDisable(true);
     flashAnimation();
-    // this.setState(
-    //   {cameraDisable: true, showFlashAnimationOpacity: true},
-    //   () => this.flashAnimation())
       
     if (cameraRef) {
       const photo = await cameraRef.takePictureAsync();
@@ -72,7 +72,15 @@ export default function HomeScreen() {
         console.log(photo.uri);
         setPhoto(photo.uri);
         //save photo to gallery
-        // CameraRoll.save(photo.uri, { type: 'photo', album: 'expo-camera' });
+          // Save the photo to app memory
+          const fileUri = `${FileSystem.documentDirectory}photo_${Date.now()}.jpg`;
+          await FileSystem.copyAsync({
+            from: photo.uri,
+            to: fileUri,
+          });
+          console.log('Photo saved at:', fileUri);
+          setPhotoCount((prevCount) => prevCount + 1);
+          setCameraDisable(false); // Re-enable camera
 
       }
     }
@@ -87,59 +95,16 @@ export default function HomeScreen() {
         ref={(ref) => setCameraRef(ref)}
         >
         <View style={styles.buttonContainer}>
-          {/* <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-            <Text style={styles.text}>Flip Camera</Text>
-          </TouchableOpacity> */}
           <TouchableOpacity style={styles.button} onPress={takePicture}>
             <Text style={styles.text}>Take Picture</Text>
           </TouchableOpacity>
+          <Text style={styles.text}>Num of photos taken: {photoCount}
+            
+          </Text>
         </View>
       </CameraView>
     </View>
-    // <ParallaxScrollView
-    //   headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-    //   headerImage={
-    //     <Image
-    //       source={require('@/assets/images/partial-react-logo.png')}
-    //       style={styles.reactLogo}
-    //     />
-    //   }>
-    //   <ThemedView style={styles.titleContainer}>
-    //     <ThemedText type="title">Welcome!</ThemedText>
-    //     <HelloWave />
-    //   </ThemedView>
-    //   <ThemedView style={styles.stepContainer}>
-    //     <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-    //     <ThemedText>
-    //       Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-    //       Press{' '}
-    //       <ThemedText type="defaultSemiBold">
-    //         {Platform.select({
-    //           ios: 'cmd + d',
-    //           android: 'cmd + m',
-    //           web: 'F12'
-    //         })}
-    //       </ThemedText>{' '}
-    //       to open developer tools.
-    //     </ThemedText>
-    //   </ThemedView>
-    //   <ThemedView style={styles.stepContainer}>
-    //     <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-    //     <ThemedText>
-    //       Tap the Explore tab to learn more about what's included in this starter app.
-    //     </ThemedText>
-    //   </ThemedView>
-    //   <ThemedView style={styles.stepContainer}>
-    //     <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-    //     <ThemedText>
-    //       When you're ready, run{' '}
-    //       <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-    //       <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-    //       <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-    //       <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-    //     </ThemedText>
-    //   </ThemedView>
-    // </ParallaxScrollView>
+   
   );
 }
 
