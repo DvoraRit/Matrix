@@ -4,9 +4,12 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import 'react-native-reanimated';
 //import { askCameraPermission } from './helper/camera';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { CameraView, CameraType, useCameraPermissions, Camera
+  , CameraCapturedPicture,
+  CameraViewRef
+ } from 'expo-camera';
 
 import { TouchableOpacity, View, StyleSheet, Text } from 'react-native';
 
@@ -15,7 +18,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-
+  const [permission, requestPermission] = useCameraPermissions();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -23,7 +26,11 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
-
+      //askCameraPermission();
+      
+      if(permission?.status !== 'granted') {
+        requestPermission();
+      }
     
     }
   }, [loaded]);

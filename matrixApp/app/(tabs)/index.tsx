@@ -1,8 +1,6 @@
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+
 import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 import { CameraView, CameraType, useCameraPermissions, Camera
   , CameraCapturedPicture,
   CameraViewRef
@@ -44,19 +42,19 @@ export default function HomeScreen() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
 
-  function flashAnimation() {
-    Animated.timing(animatedOpacity, {
-      useNativeDriver: false,
-      toValue: 1,
-      duration: 0,
-    }).start(() => {
-      Animated.timing(animatedOpacity, {
-        useNativeDriver: false,
-        toValue: 0,
-        duration: 2000,
-      }).start();
-    });
-  }
+  // function flashAnimation() {
+  //   Animated.timing(animatedOpacity, {
+  //     useNativeDriver: false,
+  //     toValue: 1,
+  //     duration: 0,
+  //   }).start(() => {
+  //     Animated.timing(animatedOpacity, {
+  //       useNativeDriver: false,
+  //       toValue: 0,
+  //       duration: 2000,
+  //     }).start();
+  //   });
+  // }
 
 
   const takePicture = async () => {
@@ -64,7 +62,7 @@ export default function HomeScreen() {
     //disable camera and show flash animation
     setShowFlashAnimationOpacity(true);
     setCameraDisable(true);
-    flashAnimation();
+   // flashAnimation();
       
     if (cameraRef) {
       const photo = await cameraRef.takePictureAsync();
@@ -89,7 +87,6 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-
         <CameraView style={styles.camera} facing={facing} 
         animateShutter={true}
         ref={(ref) => setCameraRef(ref)}
@@ -125,10 +122,10 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     backgroundColor: 'transparent',
-    margin: 64,
+    //margin: 64,
   },
   button: {
-    flex: 1,
+    //flex: 1,
     alignSelf: 'flex-end',
     alignItems: 'center',
   },
@@ -136,6 +133,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
+    alignSelf: 'flex-start',
+    alignItems: 'center',
   },
 
   ///////////
