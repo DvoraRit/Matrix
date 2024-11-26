@@ -1,17 +1,13 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
-//import { askCameraPermission } from './helper/camera';
+import { useEffect } from 'react';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { CameraView, CameraType, useCameraPermissions, Camera
-  , CameraCapturedPicture,
-  CameraViewRef
- } from 'expo-camera';
-
-import { TouchableOpacity, View, StyleSheet, Text } from 'react-native';
+import { useCameraPermissions} from 'expo-camera';
+ import * as Notifications from 'expo-notifications';
+import {View, StyleSheet, Alert } from 'react-native';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -26,12 +22,21 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
-      //askCameraPermission();
-      
+      //askCameraPermission
       if(permission?.status !== 'granted') {
         requestPermission();
       }
-    
+      //ask notif permission
+      requestNutificationPermissions();
+       // Set notification handler
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: false,
+          shouldSetBadge: false,
+        }),
+      });
+
     }
   }, [loaded]);
 
@@ -39,7 +44,41 @@ export default function RootLayout() {
     return null;
   }
 
+    // Request permissions for notifications
+    const requestNutificationPermissions = async () => {    
+      const { status } = await Notifications.getPermissionsAsync();
+      
+      if (status !== 'granted') {
+        const { status: newStatus } = await Notifications.requestPermissionsAsync();
+        if (newStatus !== 'granted') {
+          Alert.alert('Permission required', 'Notifications permissions are required to send alerts.');
+          return;
+        }
+        else{
+          scheduleNotification();
+        }
+      }
+      
+    };
 
+    // Schedule a notification every 10 minutes
+  const scheduleNotification = async () => {
+    await Notifications.cancelAllScheduledNotificationsAsync(); // Clear existing notifications (if any)
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Hello!',
+        body: 'This is a reminder every 10 minutes.',
+      },
+      trigger: {
+        seconds: 2 * 60, // 10 minutes in seconds
+        repeats: true, // Repeat every 10 minutes
+        type: 'timeInterval',
+      } as Notifications.TimeIntervalTriggerInput,
+    });
+
+    Alert.alert('Notification Scheduled', 'You will receive a "Hello" notification every 10 minutes.');
+  };
 
   return (
     <View style={styles.container}>

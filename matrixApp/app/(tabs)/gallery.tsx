@@ -41,8 +41,14 @@ export default function Gallery() {
       // Filter photos (optional: based on a naming convention, e.g., photo_)
       const photoFiles = files.filter((file) => file.startsWith('photo_'));
       // Create URIs for each photo
-      const photoUris = photoFiles.map((file) => `${FileSystem.documentDirectory}${file}`);      
-      setPhotos((prevPhotos) => [...prevPhotos, ...photoUris]);
+      const photoUris = photoFiles.map((file) => `${FileSystem.documentDirectory}${file}`);  
+      //ensure that new photos are only added if they are not already in the state.    
+      setPhotos((prevPhotos) => {
+        const existingPhotosSet = new Set(prevPhotos);//Convert the existing photos state to a Set to efficiently check if a photo already exists.
+        const uniquePhotos = photoUris.filter((uri) => !existingPhotosSet.has(uri));
+        return [...prevPhotos, ...uniquePhotos];
+      });
+
     } catch (error) {
       console.error('Error loading photos:', error);
     } finally {
@@ -97,7 +103,7 @@ export default function Gallery() {
         <FlatList
           data={photos}
           renderItem={renderPhoto}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(item) => item}// Use the photo URI as the key
           numColumns={2} // Two photos per row
           contentContainerStyle={styles.list}
           onEndReached={loadPhotos} // Infinite scrolling

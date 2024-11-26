@@ -1,12 +1,9 @@
 
 
 import { ThemedText } from '@/components/ThemedText';
-import { CameraView, CameraType, useCameraPermissions, Camera
-  , CameraCapturedPicture,
-  CameraViewRef
- } from 'expo-camera';
+import { CameraView, CameraType, useCameraPermissions} from 'expo-camera';
 import React, { useEffect, useState } from 'react';
-import { TouchableOpacity, View, StyleSheet, Text, Animated } from 'react-native';
+import { TouchableOpacity, View, StyleSheet, Text } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 
 export default function HomeScreen() {
@@ -14,9 +11,7 @@ export default function HomeScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [cameraRef, setCameraRef] = useState<CameraView | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
-  const [animatedOpacity] = useState(new Animated.Value(0));
   const [cameraDisable, setCameraDisable] = useState(false);
-  const [showFlashAnimationOpacity, setShowFlashAnimationOpacity] = useState(false);
   const [photoCount, setPhotoCount] = useState(0); // Counter state for the number of photos taken
 
   useEffect(() => {
@@ -42,32 +37,12 @@ export default function HomeScreen() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
 
-  // function flashAnimation() {
-  //   Animated.timing(animatedOpacity, {
-  //     useNativeDriver: false,
-  //     toValue: 1,
-  //     duration: 0,
-  //   }).start(() => {
-  //     Animated.timing(animatedOpacity, {
-  //       useNativeDriver: false,
-  //       toValue: 0,
-  //       duration: 2000,
-  //     }).start();
-  //   });
-  // }
-
-
   const takePicture = async () => {
     if (cameraDisable) return;
-    //disable camera and show flash animation
-    setShowFlashAnimationOpacity(true);
-    setCameraDisable(true);
-   // flashAnimation();
       
     if (cameraRef) {
       const photo = await cameraRef.takePictureAsync();
       if(photo){
-        console.log(photo.uri);
         setPhoto(photo.uri);
         //save photo to gallery
           // Save the photo to app memory
@@ -76,7 +51,6 @@ export default function HomeScreen() {
             from: photo.uri,
             to: fileUri,
           });
-          console.log('Photo saved at:', fileUri);
           setPhotoCount((prevCount) => prevCount + 1);
           setCameraDisable(false); // Re-enable camera
 
@@ -92,12 +66,13 @@ export default function HomeScreen() {
         ref={(ref) => setCameraRef(ref)}
         >
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={takePicture}>
-            <Text style={styles.text}>Take Picture</Text>
+          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+            <Text style={styles.text}>Switch Camera Facing</Text>
           </TouchableOpacity>
-          <Text style={styles.text}>Num of photos taken: {photoCount}
-            
-          </Text>
+          <TouchableOpacity style={styles.button} onPress={takePicture}>
+            <Text style={styles.buttonText}>Take Picture</Text>
+          </TouchableOpacity>           
+          <Text style={styles.text}>Num of photos taken: {photoCount}</Text>
         </View>
       </CameraView>
     </View>
@@ -119,39 +94,31 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buttonContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-    //margin: 64,
+    position: 'absolute', // Keep the container fixed at the bottom
+    bottom: 20,           // Position from the bottom
+    left: 20,
+    right: 20,
+    flexDirection: 'column', // Stack items vertically
+    justifyContent: 'center', // Center items vertically in the container
+    alignItems: 'center',    // Center items horizontally
+    gap: 15,  
   },
   button: {
-    //flex: 1,
-    alignSelf: 'flex-end',
+    backgroundColor: 'black',
+    padding: 15,
+    borderRadius: 10,
     alignItems: 'center',
+    width: '100%',           // Stretch the button to full container width
   },
   text: {
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
-    alignSelf: 'flex-start',
-    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
   },
 
-  ///////////
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
 });
