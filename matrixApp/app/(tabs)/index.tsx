@@ -1,11 +1,10 @@
 
 
-import { ThemedText } from '@/components/ThemedText';
 import { CameraView, CameraType, useCameraPermissions} from 'expo-camera';
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, View, StyleSheet, Text } from 'react-native';
-import * as FileSystem from 'expo-file-system';
-
+import { requestCameraPermission, toggleCameraFacing, takePicture } from './helpers/cameraHelper'; // Adjust the path as needed
+ 
 export default function HomeScreen() {
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
@@ -15,48 +14,14 @@ export default function HomeScreen() {
   const [photoCount, setPhotoCount] = useState(0); // Counter state for the number of photos taken
 
   useEffect(() => {
-    requestCameraPermission();
-  }, []);
-
-  function requestCameraPermission() {
-    if (permission?.status !== 'granted') {
-      return (
-        <View style={styles.container}>
-          <ThemedText style={styles.message}>
-            Camera permission is required to use this screen
-          </ThemedText>
-          <TouchableOpacity onPress={requestPermission}>
-            <ThemedText style={styles.message}>Request Permission</ThemedText>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-  }
-
-  function toggleCameraFacing() {
-    setFacing(current => (current === 'back' ? 'front' : 'back'));
-  }
-
-  const takePicture = async () => {
-    if (cameraDisable) return;
-      
-    if (cameraRef) {
-      const photo = await cameraRef.takePictureAsync();
-      if(photo){
-        setPhoto(photo.uri);
-        //save photo to gallery
-          // Save the photo to app memory
-          const fileUri = `${FileSystem.documentDirectory}photo_${Date.now()}.jpg`;
-          await FileSystem.copyAsync({
-            from: photo.uri,
-            to: fileUri,
-          });
-          setPhotoCount((prevCount) => prevCount + 1);
-          setCameraDisable(false); // Re-enable camera
-
+    const initCamera = async () => {
+      const granted = await requestCameraPermission(permission, requestPermission);
+      if (!granted) {
+        setCameraDisable(true);
       }
-    }
-  };
+    };
+    initCamera();
+  }, [permission]);
 
 
   return (
@@ -66,10 +31,15 @@ export default function HomeScreen() {
         ref={(ref) => setCameraRef(ref)}
         >
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+          <TouchableOpacity 
+            style={styles.button}  
+            onPress={() => setFacing(toggleCameraFacing(facing))}>
             <Text style={styles.text}>Switch Camera Facing</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={takePicture}>
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={() => takePicture(cameraRef, setPhoto, setPhotoCount, cameraDisable)}
+            >
             <Text style={styles.buttonText}>Take Picture</Text>
           </TouchableOpacity>           
           <Text style={styles.text}>Num of photos taken: {photoCount}</Text>

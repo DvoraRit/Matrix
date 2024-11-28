@@ -25,8 +25,6 @@ export default function Gallery() {
 
   // Load photos from the app memory (FileSystem) and add them to the state
   const loadPhotos = async () => {
-    console.log("Loading photos");
-    
     setIsFetching(true);
     try {
       // Get all files from the app memory
@@ -34,9 +32,6 @@ export default function Gallery() {
       if(FileSystem.documentDirectory){
         files = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory);
       }
-    else{
-        console.log("No files found")
-    }
 
       // Filter photos (optional: based on a naming convention, e.g., photo_)
       const photoFiles = files.filter((file) => file.startsWith('photo_'));

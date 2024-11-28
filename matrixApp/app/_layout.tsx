@@ -8,6 +8,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { useCameraPermissions} from 'expo-camera';
  import * as Notifications from 'expo-notifications';
 import {View, StyleSheet, Alert } from 'react-native';
+import { requestNotificationPermissions } from './helper/notificationHelper';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -26,8 +27,9 @@ export default function RootLayout() {
       if(permission?.status !== 'granted') {
         requestPermission();
       }
-      //ask notif permission
-      requestNutificationPermissions();
+      //ask notif permission from helper
+      requestNotificationPermissions();
+
        // Set notification handler
       Notifications.setNotificationHandler({
         handleNotification: async () => ({
@@ -44,42 +46,6 @@ export default function RootLayout() {
     return null;
   }
 
-    // Request permissions for notifications
-    const requestNutificationPermissions = async () => {    
-      const { status } = await Notifications.getPermissionsAsync();
-      
-      if (status !== 'granted') {
-        const { status: newStatus } = await Notifications.requestPermissionsAsync();
-        if (newStatus !== 'granted') {
-          Alert.alert('Permission required', 'Notifications permissions are required to send alerts.');
-          return;
-        }
-        else{
-          scheduleNotification();
-        }
-      }
-      
-    };
-
-    // Schedule a notification every 10 minutes
-  const scheduleNotification = async () => {
-    await Notifications.cancelAllScheduledNotificationsAsync(); // Clear existing notifications (if any)
-
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Hello!',
-        body: 'This is a reminder every 10 minutes.',
-      },
-      trigger: {
-        seconds: 2 * 60, // 10 minutes in seconds
-        repeats: true, // Repeat every 10 minutes
-        type: 'timeInterval',
-      } as Notifications.TimeIntervalTriggerInput,
-    });
-
-    Alert.alert('Notification Scheduled', 'You will receive a "Hello" notification every 10 minutes.');
-  };
-
   return (
     <View style={styles.container}>
 
@@ -91,6 +57,7 @@ export default function RootLayout() {
   </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
