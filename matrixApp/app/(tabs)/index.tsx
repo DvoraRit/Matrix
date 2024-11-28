@@ -3,7 +3,7 @@
 import { CameraView, CameraType, useCameraPermissions} from 'expo-camera';
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, View, StyleSheet, Text } from 'react-native';
-import { requestCameraPermission, toggleCameraFacing, takePicture } from './helpers/cameraHelper'; // Adjust the path as needed
+import { requestCameraPermission, toggleCameraFacing, takePicture } from './helpers/cameraHelper';
  
 export default function HomeScreen() {
   const [facing, setFacing] = useState<CameraType>('back');

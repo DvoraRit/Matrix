@@ -32,8 +32,7 @@ export default function Gallery() {
       if(FileSystem.documentDirectory){
         files = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory);
       }
-
-      // Filter photos (optional: based on a naming convention, e.g., photo_)
+      // Filter out only the photos
       const photoFiles = files.filter((file) => file.startsWith('photo_'));
       // Create URIs for each photo
       const photoUris = photoFiles.map((file) => `${FileSystem.documentDirectory}${file}`);  
