@@ -22,7 +22,7 @@ Features
 
 **Setup Instructions**
     Clone the Repository:
-      git clone https://github.com/your-username/your-repo-name.git
+      git clone https://github.com/DvoraRit/Matrix.git
       cd matrixApp
 
     Install Dependencies: Make sure you have npm and Expo CLI installed. Then run:
